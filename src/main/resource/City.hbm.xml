@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+ "-//Hibernate/Hibernate Mapping DTD//EN"
+ "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+   <class name="com.hand.POJO.City" table="CITY">
+      <meta attribute="class-description">
+         This class contains the City detail. 
+      </meta>
+      <id name="city_id" type="int" column="city_id">
+         <generator class="native"/>
+      </id>
+      <property name="city" column="city" type="string"/>
+      <property name="country_id" column="country_id" type="int"/>
+    <!--  <many-to-one name="city" column="city_id" class="City" fetch="select" cascade="save-update"/>   -->
+   </class>
+</hibernate-mapping>
