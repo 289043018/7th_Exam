@@ -63,7 +63,18 @@
   </property>
  </bean>  
  
+<!-- Initialization for TransactionManager -->
+   <bean id="transactionManager" 
+      class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+      <property name="dataSource"  ref="datasource" />    
+   </bean>
 
+   <!-- Definition for studentJDBCTemplate bean -->
+   <bean id="main" 
+      class="com.hand.Main.Main">
+      <property name="dataSource"  ref="datasource" />    
+       <property name="transactionManager"  ref="transactionManager" />   
+   </bean>
    
         
 </beans>

@@ -7,23 +7,31 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.sql.DataSource;
+
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.cfg.*;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import com.hand.POJO.Address;
 import com.hand.POJO.Customer;
 import com.hand.interceptor.MyInterceptor;
 
 public class Main {
 	private static SessionFactory factory;
+	 private DataSource dataSource;
+	 private JdbcTemplate jdbcTemplateObject;
 	 private PlatformTransactionManager transactionManager;
 	public static void main(String[] args) {
 		ApplicationContext context =  new FileSystemXmlApplicationContext("ApplicationContext.xml");
@@ -38,41 +46,79 @@ public class Main {
 		String first_name;
 		String last_name;
 		String email;
-		int address_id;
+		int address_id = 0;
 		String creat_date;
 		
+		Main ME = new Main();
+		
+		Scanner sc = new Scanner(System.in);
+		
 		System.out.println("请输入first_name");
-		Scanner sc_first_name = new Scanner(System.in);
-		first_name = sc_first_name.nextLine();
+//		Scanner sc_first_name = new Scanner(System.in);
+//		first_name = sc_first_name.nextLine();
+		first_name = sc.nextLine();
 		
 		System.out.println("请输入last_name");
-		Scanner sc_last_name = new Scanner(System.in);
-		last_name = sc_last_name.nextLine();
+//		Scanner sc_last_name = new Scanner(System.in);
+//		last_name = sc_last_name.nextLine();
+		last_name = sc.nextLine();
 		
 		System.out.println("请输入email");
-		Scanner sc_email = new Scanner(System.in);
-		email = sc_email.nextLine();
+//		Scanner sc_email = new Scanner(System.in);
+//		email = sc_email.nextLine();
+		email = sc.nextLine();
+		
+		
+		
 		
 		System.out.println("请输入address_id");
 		Scanner sc_address_id = new Scanner(System.in);
 		address_id = sc_address_id.nextInt();
-	
+		if(ME.selectAddress(address_id) == false){
+			for (;ME.selectAddress(address_id) == false; ) {
+				System.out.println("输入的address_id错误，请再次输入：");
+				address_id = sc_address_id.nextInt();
+			}
+		}
+//		address_id = ME.getaddress_id(ME);
 		Date date=new Date();
 		DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		creat_date=format.format(date);
 		
 		
-		Main ME = new Main();
+		
 		
 		ME.addCustomer(first_name, last_name, email, address_id, creat_date, store_id);
-		ME.selectEmployees(first_name);
+		ME.selectCustomer(first_name);
 		
 		System.out.println("请输入要删除的Customer的ID：");
 		Scanner sc_customer_id = new Scanner(System.in);
-		int customer_id = sc_address_id.nextInt();
+		int customer_id = sc_customer_id.nextInt();
 		ME.deleteEmployee(customer_id);
 		
 	}
+	
+//	public Integer getaddress_id(Main ME){
+//		int address_id = 0;
+//		System.out.println("请输入address_id");
+//		Scanner sc_address_id = new Scanner(System.in);
+////		address_id = sc_address_id.nextInt();
+//		if(ME.selectAddress(sc_address_id.nextInt()) == false){
+//			for (;ME.selectAddress(sc_address_id.nextInt()) == true; ) {
+//				System.out.println("输入的地址ID有误，请重新输入：");
+//				Scanner sc_address_id2 = new Scanner(System.in);
+//				address_id = sc_address_id2.nextInt();
+//			}
+//		}else{
+//			address_id = sc_address_id.nextInt();
+//		}
+//		return address_id;
+//	}
+	
+	public void setDataSource(DataSource dataSource) {
+	      this.dataSource = dataSource;
+	      this.jdbcTemplateObject = new JdbcTemplate(dataSource);
+	   }
 	 public void setTransactionManager(
 		      PlatformTransactionManager transactionManager) {
 		      this.transactionManager = transactionManager;
@@ -104,8 +150,10 @@ public class Main {
      return customerID;
   }
 //  实现读取数据
-  public void selectEmployees(String first_name ){
+  public void selectCustomer(String first_name ){
      Session session = factory.openSession(new MyInterceptor());
+//     TransactionDefinition def = new DefaultTransactionDefinition();
+//     TransactionStatus status = transactionManager.getTransaction(def);
      Transaction tx = null;
      try{
         tx = session.beginTransaction();
@@ -127,17 +175,57 @@ public class Main {
         	System.out.println("First Name: " + customer.getFirst_name()); 
         	System.out.println("Last Name: " + customer.getLast_name()); 
         	System.out.println("Email: " + customer.getEmail());
-        	System.out.println("Address: " + customer.getEmail());
+        	System.out.println("Address: " + customer.getAddress_id());
         }
-        
+//        transactionManager.commit(status);
         tx.commit();
      }catch (HibernateException e) {
-    	 if (tx!=null) tx.rollback();
-    	 e.printStackTrace(); 
-     }finally {
+         if (tx!=null) tx.rollback();
+         e.printStackTrace(); 
+      }finally {
         session.close(); 
      }
   }
+//实现读取数据
+public boolean selectAddress(int address_id ){
+	boolean flag = false ;
+   Session session = factory.openSession(new MyInterceptor());
+//   TransactionDefinition def = new DefaultTransactionDefinition();
+//   TransactionStatus status = transactionManager.getTransaction(def);
+   Transaction tx = null;
+   try{
+      tx = session.beginTransaction();
+      
+      String sql = "SELECT * FROM address WHERE address_id = :address_id";
+      SQLQuery query = session.createSQLQuery(sql);
+      query.addEntity(Address.class);
+      query.setParameter("address_id", address_id);
+      List customers = query.list();  
+      
+//      String hql = "FROM Customer C WHERE C.first_name="+first_name;
+//      Query query = session.createQuery(hql);
+//      List customers = query.list();
+      Iterator iterator = customers.iterator();
+//      for (Iterator iterator = 
+//      		customers.iterator(); iterator.hasNext();){
+//      	Customer customer = (Customer) iterator.next(); 
+//
+//      }
+    	if(iterator.hasNext()){
+    		flag = true;
+    	}else{
+    		flag = false;
+    	}
+//      transactionManager.commit(status);
+      tx.commit();
+   }catch (HibernateException e) {
+       if (tx!=null) tx.rollback();
+       e.printStackTrace(); 
+    }finally {
+      session.close(); 
+   }
+return flag;
+}
   
 //实现删除数据
 public void deleteEmployee(int customer_id){
