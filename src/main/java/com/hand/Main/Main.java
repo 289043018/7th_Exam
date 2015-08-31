@@ -52,25 +52,16 @@ public class Main {
 		Main ME = new Main();
 		
 		Scanner sc = new Scanner(System.in);
-		
 		System.out.println("请输入first_name");
-//		Scanner sc_first_name = new Scanner(System.in);
-//		first_name = sc_first_name.nextLine();
 		first_name = sc.nextLine();
 		
 		System.out.println("请输入last_name");
-//		Scanner sc_last_name = new Scanner(System.in);
-//		last_name = sc_last_name.nextLine();
 		last_name = sc.nextLine();
 		
 		System.out.println("请输入email");
-//		Scanner sc_email = new Scanner(System.in);
-//		email = sc_email.nextLine();
 		email = sc.nextLine();
 		
-		
-		
-		
+
 		System.out.println("请输入address_id");
 		Scanner sc_address_id = new Scanner(System.in);
 		address_id = sc_address_id.nextInt();
@@ -84,10 +75,7 @@ public class Main {
 		Date date=new Date();
 		DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		creat_date=format.format(date);
-		
-		
-		
-		
+
 		ME.addCustomer(first_name, last_name, email, address_id, creat_date, store_id);
 		ME.selectCustomer(first_name);
 		
@@ -97,23 +85,6 @@ public class Main {
 		ME.deleteEmployee(customer_id);
 		
 	}
-	
-//	public Integer getaddress_id(Main ME){
-//		int address_id = 0;
-//		System.out.println("请输入address_id");
-//		Scanner sc_address_id = new Scanner(System.in);
-////		address_id = sc_address_id.nextInt();
-//		if(ME.selectAddress(sc_address_id.nextInt()) == false){
-//			for (;ME.selectAddress(sc_address_id.nextInt()) == true; ) {
-//				System.out.println("输入的地址ID有误，请重新输入：");
-//				Scanner sc_address_id2 = new Scanner(System.in);
-//				address_id = sc_address_id2.nextInt();
-//			}
-//		}else{
-//			address_id = sc_address_id.nextInt();
-//		}
-//		return address_id;
-//	}
 	
 	public void setDataSource(DataSource dataSource) {
 	      this.dataSource = dataSource;
@@ -130,8 +101,6 @@ public class Main {
      Integer customerID = null;
      try{
         tx = session.beginTransaction();
-//        Employee employee = new Employee(fname, lname, salary);
-//        employeeID = (Integer) session.save(employee); 
         Customer customer = new Customer();
         customer.setFirst_name(fname);
         customer.setLast_name(lname);
@@ -152,8 +121,6 @@ public class Main {
 //  实现读取数据
   public void selectCustomer(String first_name ){
      Session session = factory.openSession(new MyInterceptor());
-//     TransactionDefinition def = new DefaultTransactionDefinition();
-//     TransactionStatus status = transactionManager.getTransaction(def);
      Transaction tx = null;
      try{
         tx = session.beginTransaction();
@@ -163,10 +130,6 @@ public class Main {
         query.addEntity(Customer.class);
         query.setParameter("first_name", first_name);
         List customers = query.list();  
-        
-//        String hql = "FROM Customer C WHERE C.first_name="+first_name;
-//        Query query = session.createQuery(hql);
-//        List customers = query.list();
         for (Iterator iterator = 
         		customers.iterator(); iterator.hasNext();){
         	Customer customer = (Customer) iterator.next(); 
@@ -177,7 +140,6 @@ public class Main {
         	System.out.println("Email: " + customer.getEmail());
         	System.out.println("Address: " + customer.getAddress_id());
         }
-//        transactionManager.commit(status);
         tx.commit();
      }catch (HibernateException e) {
          if (tx!=null) tx.rollback();
@@ -190,8 +152,6 @@ public class Main {
 public boolean selectAddress(int address_id ){
 	boolean flag = false ;
    Session session = factory.openSession(new MyInterceptor());
-//   TransactionDefinition def = new DefaultTransactionDefinition();
-//   TransactionStatus status = transactionManager.getTransaction(def);
    Transaction tx = null;
    try{
       tx = session.beginTransaction();
@@ -202,21 +162,13 @@ public boolean selectAddress(int address_id ){
       query.setParameter("address_id", address_id);
       List customers = query.list();  
       
-//      String hql = "FROM Customer C WHERE C.first_name="+first_name;
-//      Query query = session.createQuery(hql);
-//      List customers = query.list();
       Iterator iterator = customers.iterator();
-//      for (Iterator iterator = 
-//      		customers.iterator(); iterator.hasNext();){
-//      	Customer customer = (Customer) iterator.next(); 
-//
-//      }
+
     	if(iterator.hasNext()){
     		flag = true;
     	}else{
     		flag = false;
     	}
-//      transactionManager.commit(status);
       tx.commit();
    }catch (HibernateException e) {
        if (tx!=null) tx.rollback();
